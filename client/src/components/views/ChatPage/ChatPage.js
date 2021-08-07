@@ -1,11 +1,23 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form, Icon, Input, Button, Row, Col, } from 'antd';
+import io from 'socket.io-client';
+
 const ChatPage = () => {
 
     const [chatMessage, setChatMessage] = useState("");
+    const [socket,setSocket] = useState();
+
+    useEffect(() => {
+        let server = "http://localhost:5000";
+        const s = io(server);
+    } , []);
 
     const handleSearchChange =(e) => {
         setChatMessage(e.target.value)
+    }
+
+    const submitChatMessage = (e) => {
+        e.preventDefault();
     }
 
     return (
