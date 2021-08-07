@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Icon, Input, Button, Row, Col, } from 'antd';
-import io from 'socket.io-client';
+import {io} from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
 import  moment  from "moment";
 
@@ -9,18 +9,27 @@ const ChatPage = () => {
     const [chatMessage, setChatMessage] = useState("");
     const [socket,setSocket] = useState("");
 
-    const dispatch = useDispatch
+    const dispatch = useDispatch();
     const user = useSelector(state => state.user)
 
     useEffect(() => {
-        let server = "http://localhost:5000";
-        const s = io(server);
+        const s = io("http://localhost:5001");
         setSocket(s);
 
+        s.on("message", (data) => {
+            console.log(data);
+        });
         return(()=>{
             s.disconnect()
+            console.log('disconnect')
         })
-    } , []);
+    },[])
+
+    useEffect(() => {
+        if(socket == null) {return};
+        console.log(socket);
+        
+    } , [socket])
 
     const handleSearchChange =(e) => {
         setChatMessage(e.target.value)
@@ -29,7 +38,6 @@ const ChatPage = () => {
     const submitChatMessage = (e) => {
         e.preventDefault();
 
-        let chatMessage = chatMessage;
         let userId = user.userData._id
         let userName = user.userData.name;
         let userImage = user.userData.image;

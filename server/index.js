@@ -6,20 +6,30 @@ const cors = require('cors')
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
-const server = require(('http')).createServer(app);
-const io = require('socket.io')(server);
+// const server = require(('http')).createServer(app);
+const io = require("socket.io")(5001, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+})
+
 const config = require("./config/key");
 
-;
+const {Chat} = require("./models/Chat");
 
 const mongoose = require("mongoose");
-const connect = mongoose.connect(config.mongoURI,
+const connect = ()=>{
+  mongoose.connect(config.mongoURI,
   {
     useNewUrlParser: true, useUnifiedTopology: true,
     useCreateIndex: true, useFindAndModify: false
   })
   .then(() => console.log('MongoDB Connected...'))
   .catch(err => console.log(err));
+}
+
+connect();
 
 app.use(cors())
 
@@ -34,7 +44,14 @@ app.use(cookieParser());
 app.use('/api/users', require('./routes/users'));
 
 io.on('connection', socket => {
-  socket.on('inputChatMessage', message => {
+  socket.emit("hello", "world");
+  socket.on('inputChatMessage', async msg => {
+        const newChat = new Chat({ message: msg.chatMessage, sender:msg.userID, type: msg.type })
+        await newChat.save();
+        const chat = await Chat.find({ "_id": newChat._id }).populate("sender")
+        socket.emit("message",chat)
+  });
+  console.log("connected");
 });
 
 //use this to show the image you have in node js server to client (react js)
