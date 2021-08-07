@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Icon, Input, Button, Row, Col, } from 'antd';
 import io from 'socket.io-client';
+import { useDispatch, useSelector } from 'react-redux';
+import  moment  from "moment";
 
 const ChatPage = () => {
 
     const [chatMessage, setChatMessage] = useState("");
-    const [socket,setSocket] = useState();
+    const [socket,setSocket] = useState("");
+
+    const dispatch = useDispatch
+    const user = useSelector(state => state.user)
 
     useEffect(() => {
         let server = "http://localhost:5000";
         const s = io(server);
+        setSocket(s);
+
+        return(()=>{
+            s.disconnect()
+        })
     } , []);
 
     const handleSearchChange =(e) => {
@@ -18,6 +28,24 @@ const ChatPage = () => {
 
     const submitChatMessage = (e) => {
         e.preventDefault();
+
+        let chatMessage = chatMessage;
+        let userId = user.userData._id
+        let userName = user.userData.name;
+        let userImage = user.userData.image;
+        let nowTime = moment();
+        let type = "Image";
+
+        socket.emit("inputChatMessage",{
+            chatMessage,
+            userId,
+            userName,
+            userImage,
+            nowTime,
+            type
+        });
+
+        setChatMessage("");
     }
 
     return (
@@ -41,7 +69,7 @@ const ChatPage = () => {
 
                     <Row >
                         <Form layout="inline" 
-                        // onSubmit={submitChatMessage}
+                        onSubmit={submitChatMessage}
                         >
                             <Col span={18}>
                                 <Input
@@ -59,7 +87,7 @@ const ChatPage = () => {
 
                             <Col span={4}>
                                 <Button type="primary" style={{ width: '100%' }} 
-                                // onClick={submitChatMessage} 
+                                onClick={submitChatMessage} 
                                  htmlType="submit">
                                     <Icon type="enter" />
                                 </Button>
