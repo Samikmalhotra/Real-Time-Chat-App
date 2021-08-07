@@ -19,9 +19,9 @@ const ChatPage = () => {
         s.on("message", (data) => {
             console.log(data);
         });
+        
         return(()=>{
             s.disconnect()
-            console.log('disconnect')
         })
     },[])
 
