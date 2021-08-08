@@ -3,6 +3,7 @@ import { Form, Icon, Input, Button, Row, Col, } from 'antd';
 import {io} from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
 import  moment  from "moment";
+import { getChats } from '../../../_actions/chat_actions';
 
 const ChatPage = () => {
 
@@ -14,12 +15,13 @@ const ChatPage = () => {
 
     useEffect(() => {
         const s = io("http://localhost:5001");
-        setSocket(s);
+
+        dispatch(getChats)
 
         s.on("message", (data) => {
             console.log(data);
         });
-        
+
         return(()=>{
             s.disconnect()
         })
