@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Form, Icon, Input, Button, Row, Col, } from 'antd';
 import {io} from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
 import  moment  from "moment";
 import { afterPostMessage, getChats } from '../../../_actions/chat_actions';
-import ChatCard from './ChatCard'
-
+import ChatCard from './ChatCard';
+import Dropzone from 'react-dropzone';
+import axios from 'axios';
 
 const ChatPage = () => {
 
@@ -15,7 +16,6 @@ const ChatPage = () => {
     const dispatch = useDispatch();
     const user = useSelector(state => state.user)
     const chat = useSelector(state => state.chat)
-
 
     useEffect(() => {
         const s = io("http://localhost:5001");
@@ -32,11 +32,23 @@ const ChatPage = () => {
         })
     },[])
 
-    useEffect(() => {
-        if(socket == null) {return};
-        console.log(socket);
-        
-    } , [socket])
+    const onDrop = async(files) => {
+
+        let formData = new FormData();
+        const config = {
+            header: { 'content-type': 'multipart/form-data' }
+        }
+
+        formData.append("file", files[0])
+
+        const res = await axios.post("/api/upload", formData, config);
+    }
+
+    const messageEndRef = useCallback((messageEnd) => {
+        if(messageEnd === null) return;
+        messageEnd.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+        console.log(messageEnd);
+    },[])
 
     const handleSearchChange =(e) => {
         setChatMessage(e.target.value)
@@ -77,9 +89,7 @@ const ChatPage = () => {
                             })}</div>
                         )}
                         <div
-                            // ref={el => {
-                            //     this.messagesEnd = el;
-                            // }}
+                            ref={messageEndRef}
                             style={{ float: "left", clear: "both" }}
                         />
                     </div>
@@ -99,7 +109,18 @@ const ChatPage = () => {
                                 />
                             </Col>
                             <Col span={2}>
-                                
+                            <Dropzone onDrop={onDrop}>
+                                    {({ getRootProps, getInputProps }) => (
+                                        <section>
+                                            <div {...getRootProps()}>
+                                                <input {...getInputProps()} />
+                                                <Button>
+                                                    <Icon type="upload" />
+                                                </Button>
+                                            </div>
+                                        </section>
+                                    )}
+                                </Dropzone>
                             </Col>
 
                             <Col span={4}>
