@@ -33,7 +33,7 @@ const ChatPage = () => {
     },[])
 
     const onDrop = async(files) => {
-
+        console.log(files)
         let formData = new FormData();
         const config = {
             header: { 'content-type': 'multipart/form-data' }
@@ -42,6 +42,24 @@ const ChatPage = () => {
         formData.append("file", files[0])
 
         const res = await axios.post("api/chat/uploadfiles", formData, config);
+        console.log(res.data);
+        if (res.data.success) {
+            let chatMessage = res.data.url;
+            let userId = user.userData._id
+            let userName = user.userData.name;
+            let userImage = user.userData.image;
+            let nowTime = moment();
+            let type = "VideoOrImage"
+
+            socket.emit("inputChatMessage", {
+                chatMessage,
+                userId,
+                userName,
+                userImage,
+                nowTime,
+                type
+            });
+        }
     }
 
     const messageEndRef = useCallback((messageEnd) => {
@@ -61,7 +79,7 @@ const ChatPage = () => {
         let userName = user.userData.name;
         let userImage = user.userData.image;
         let nowTime = moment();
-        let type = "Image";
+        let type = "Text";
 
         socket.emit("inputChatMessage",{
             chatMessage,

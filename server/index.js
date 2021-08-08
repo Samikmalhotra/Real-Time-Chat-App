@@ -54,7 +54,16 @@ var storage = multer.diskStorage({
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}_${file.originalname}`)
   }
+  // fileFilter: (req, file, cb) => {
+  //   const ext = path.extname(file.originalname)
+  //   if (ext !== '.jpg' && ext !== '.png' && ext !== '.mp4') {
+  //     return cb(res.status(400).end('only jpg, png, mp4 is allowed'), false);
+  //   }
+  //   cb(null, true)
+  // }
 })
+
+var upload = multer({ storage: storage }).single("file")
 
 app.post("/api/chat/uploadfiles", auth ,(req, res) => {
   upload(req, res, err => {
@@ -67,7 +76,6 @@ app.post("/api/chat/uploadfiles", auth ,(req, res) => {
 
 
 io.on('connection', socket => {
-  socket.emit("hello", "world");
   socket.on('inputChatMessage', async msg => {
         const newChat = new Chat({ message: msg.chatMessage, sender:msg.userId, type: msg.type })
         await newChat.save();
