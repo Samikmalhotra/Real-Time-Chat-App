@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const cors = require('cors')
-
+const {auth} = require('./middleware/auth')
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
@@ -43,6 +43,27 @@ app.use(cookieParser());
 
 app.use('/api/users', require('./routes/users'));
 app.use('/api/chat', require('./routes/chat'));
+
+const multer = require("multer");
+const fs = require("fs");
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}_${file.originalname}`)
+  }
+})
+
+app.post("/api/chat/uploadfiles", auth ,(req, res) => {
+  upload(req, res, err => {
+    if(err) {
+      return res.json({ success: false, err })
+    }
+    return res.json({ success: true, url: res.req.file.path });
+  })
+});
 
 
 io.on('connection', socket => {

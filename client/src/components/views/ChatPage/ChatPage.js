@@ -41,7 +41,7 @@ const ChatPage = () => {
 
         formData.append("file", files[0])
 
-        const res = await axios.post("/api/upload", formData, config);
+        const res = await axios.post("api/chat/uploadfiles", formData, config);
     }
 
     const messageEndRef = useCallback((messageEnd) => {
