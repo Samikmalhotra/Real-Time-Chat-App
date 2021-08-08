@@ -3,7 +3,9 @@ import { Form, Icon, Input, Button, Row, Col, } from 'antd';
 import {io} from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
 import  moment  from "moment";
-import { getChats } from '../../../_actions/chat_actions';
+import { afterPostMessage, getChats } from '../../../_actions/chat_actions';
+import ChatCard from './ChatCard'
+
 
 const ChatPage = () => {
 
@@ -12,14 +14,17 @@ const ChatPage = () => {
 
     const dispatch = useDispatch();
     const user = useSelector(state => state.user)
+    const chat = useSelector(state => state.chat)
+
 
     useEffect(() => {
         const s = io("http://localhost:5001");
-
-        dispatch(getChats)
+        setSocket(s);
+        dispatch(getChats())
 
         s.on("message", (data) => {
             console.log(data);
+            dispatch(afterPostMessage(data));
         });
 
         return(()=>{
@@ -65,10 +70,12 @@ const ChatPage = () => {
                 </div>
 
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <div className="infinite-container">
-                        {/* {this.props.chats && (
-                            <div>{this.renderCards()}</div>
-                        )} */}
+                    <div className="infinite-container" style={{height: '425px', overflowY:'scroll'}}>
+                        {chat.chats && (
+                            <div>{chat.chats && chat.chats.map((chat) => {
+                                return (<ChatCard key={chat._id} {...chat}/>)
+                            })}</div>
+                        )}
                         <div
                             // ref={el => {
                             //     this.messagesEnd = el;

@@ -42,11 +42,13 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use('/api/users', require('./routes/users'));
+app.use('/api/chat', require('./routes/chat'));
+
 
 io.on('connection', socket => {
   socket.emit("hello", "world");
   socket.on('inputChatMessage', async msg => {
-        const newChat = new Chat({ message: msg.chatMessage, sender:msg.userID, type: msg.type })
+        const newChat = new Chat({ message: msg.chatMessage, sender:msg.userId, type: msg.type })
         await newChat.save();
         const chat = await Chat.find({ "_id": newChat._id }).populate("sender")
         socket.emit("message",chat)
